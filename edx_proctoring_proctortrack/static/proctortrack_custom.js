@@ -1,7 +1,7 @@
 import { handlerWrapper } from "@edx/edx-proctoring";
 
 const cdnURL =
-  "https://raw.githubusercontent.com/utkarsh-verificient/vt_cdn/master/vt_cjs.IQEQWWZ2.js";
+  "https://raw.githubusercontent.com/utkarsh-verificient/vt_cdn/customjs_2/edx_proctoring_proctortrack/static/vt_cjs.IQEQWWZ2.js";
 
 let isCDNLoaded = false;
 let sessionUUID = null;
