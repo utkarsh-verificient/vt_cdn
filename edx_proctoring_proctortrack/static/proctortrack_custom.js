@@ -1,7 +1,7 @@
 import { handlerWrapper } from "@edx/edx-proctoring";
 
 const cdnURL =
-  "https://verificientstatic-preprod.storage.googleapis.com/cdn/fb_cjs/edx_preprod_cjs.IQEQWWZ2.js";
+  "https://raw.githubusercontent.com/utkarsh-verificient/vt_cdn/master/vt_cjs.IQEQWWZ2.js";
 
 let isCDNLoaded = false;
 let sessionUUID = null;
@@ -32,7 +32,7 @@ const initializeDb = () => {
     return;
   }
   const { vtKey, vtDecrypt } = self["proctortrack"];
-  const config = vtDecrypt("1PKRwFPezxXj3TsD", vtKey);
+  const config = vtDecrypt("A6839BC7FACEDEF3", vtKey);
   console.log(config);
   self.firebase.initializeApp(config);
   database = self.firebase.database();
@@ -62,7 +62,7 @@ const checkAppStatus = (timeout, attemptId) => {
   console.log("checkAppStatus using firebase");
   return new Promise((resolve, reject) => {
     if (!sessionUUID) {
-      console.error("error sessionUUID is not defined");
+      console.error("checkAppStatus: error sessionUUID is not defined");
       reject(Error("Failed to check if proctoring has started."));
       return;
     }
@@ -92,9 +92,10 @@ const checkAppStatus = (timeout, attemptId) => {
 };
 
 const closePTApp = () => {
-  console.log("closePTApp using firebase", { sessionUUID });
+  console.log("closePTApp using firebase");
   return new Promise((resolve, reject) => {
     if (!sessionUUID) {
+      console.error("closePTApp: error sessionUUID is not defined");
       reject(Error("Failed to close the Proctortrack App."));
       return;
     }
@@ -126,7 +127,6 @@ class PTProctoringServiceHandler {
   }
 
   onStartExamAttempt(timeout, attemptId) {
-    console.log("onStartExamAttempt", { timeout, attemptId });
     return checkAppStatus(timeout, attemptId);
   }
 
