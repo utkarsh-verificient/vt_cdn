@@ -32,9 +32,9 @@ const initializeDb = () => {
     return;
   }
   const { vtKey, vtDecrypt } = self["proctortrack"];
-  const config = vtDecrypt("A6839BC7FACEDEF3", vtKey);
-  console.log(config);
-  self.firebase.initializeApp(config);
+  const config = vtDecrypt("1PKRwFPezxXj3TsD", vtKey);
+  console.log("firebase config", config);
+  self.firebase.initializeApp(JSON.parse(config));
   database = self.firebase.database();
 };
 
@@ -48,6 +48,7 @@ const initPresenceListener = (sessionUUID) => {
   const sessionRef = database.ref(`/sessions/${sessionUUID}`);
   if (!presenceListener) {
     presenceListener = connectionRef.on("value", (snap) => {
+      console.log(".info/connected", snap.val());
       if (snap.val() === true) {
         sessionRef.update({ is_custom_js_online: true });
         sessionRef.onDisconnect().update({ is_custom_js_online: false });
@@ -58,8 +59,8 @@ const initPresenceListener = (sessionUUID) => {
 
 const checkAppStatus = (timeout, attemptId) => {
   sessionUUID = attemptId;
-  initPresenceListener(sessionUUID);
-  console.log("checkAppStatus using firebase");
+  initPresenceListener(attemptId);
+  console.log("checkAppStatus using firebase", { sessionUUID, attemptId });
   return new Promise((resolve, reject) => {
     if (!sessionUUID) {
       console.error("checkAppStatus: error sessionUUID is not defined");
@@ -70,7 +71,7 @@ const checkAppStatus = (timeout, attemptId) => {
     const onData = (data) => {
       const value = data.val();
       const { is_et_online, is_proctoring_started } = value;
-      console.log("appStatusUsingFirebase value", value);
+      console.log("appStatusUsingFirebase onData", value);
       if (is_et_online && is_proctoring_started) {
         resolve({ proctoring_started: true });
       } else if (is_et_online && !is_proctoring_started) {
@@ -84,15 +85,16 @@ const checkAppStatus = (timeout, attemptId) => {
       }
     };
     const onError = (error) => {
-      console.error("appStatusUsingFirebase", error);
+      console.error("appStatusUsingFirebase onError", error);
       reject(Error("Failed to check if proctoring has started."));
     };
     sessionRef.once("value", onData, onError);
   });
 };
 
-const closePTApp = () => {
-  console.log("closePTApp using firebase");
+const closePTApp = (attemptId) => {
+  sessionUUID = attemptId;
+  console.log("closePTApp using firebase", { sessionUUID, attemptId });
   return new Promise((resolve, reject) => {
     if (!sessionUUID) {
       console.error("closePTApp: error sessionUUID is not defined");
@@ -104,7 +106,7 @@ const closePTApp = () => {
     const onData = (data) => {
       const value = data.val();
       const { is_et_online } = value;
-      console.log("closePTAppUsingFirebase value", value);
+      console.log("closePTAppUsingFirebase onData", value);
       if (is_et_online) {
         reject(Error("Failed to close the Proctortrack App."));
       } else if (!is_et_online) {
@@ -113,8 +115,8 @@ const closePTApp = () => {
         reject(Error("Failed to close the Proctortrack App."));
       }
     };
-    const onError = () => {
-      console.error("closePTAppUsingFirebase", error);
+    const onError = (error) => {
+      console.error("closePTAppUsingFirebase onError", error);
       reject(Error("Failed to close the Proctortrack App."));
     };
     sessionRef.once("value", onData, onError);
@@ -127,15 +129,18 @@ class PTProctoringServiceHandler {
   }
 
   onStartExamAttempt(timeout, attemptId) {
+    console.log("onStartExamAttempt", { timeout, attemptId });
     return checkAppStatus(timeout, attemptId);
   }
 
-  onEndExamAttempt() {
-    return closePTApp();
+  onEndExamAttempt(attemptId) {
+    console.log("onEndExamAttempt", { attemptId });
+    return closePTApp(attemptId);
   }
 
-  onPing(timeout) {
-    return checkAppStatus(timeout);
+  onPing(timeout, attemptId) {
+    console.log("onPing", { timeout, attemptId });
+    return checkAppStatus(timeout, attemptId);
   }
 }
 
