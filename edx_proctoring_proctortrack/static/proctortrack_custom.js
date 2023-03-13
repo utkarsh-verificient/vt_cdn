@@ -1,7 +1,9 @@
 import { handlerWrapper } from "@edx/edx-proctoring";
 
-const cdnURL =
-  "https://raw.githubusercontent.com/utkarsh-verificient/vt_cdn/customjs_2/edx_proctoring_proctortrack/static/vt_cjs.IQEQWWZ2.js";
+console.log(process.env.JS_ENV_EXTRA_CONFIG);
+
+const cdnURL = process.env.JS_ENV_EXTRA_CONFIG.PROCTORTRACK_CDN_URL;
+const KEY = process.env.JS_ENV_EXTRA_CONFIG.PROCTORTRACK_CONFIG_KEY;
 
 let isCDNLoaded = false;
 let sessionUUID = null;
@@ -32,7 +34,7 @@ const initializeDb = () => {
     return;
   }
   const { vtKey, vtDecrypt } = self["proctortrack"];
-  const config = vtDecrypt("1PKRwFPezxXj3TsD", vtKey);
+  const config = vtDecrypt(KEY, vtKey);
   console.log("firebase config", config);
   self.firebase.initializeApp(JSON.parse(config));
   database = self.firebase.database();
