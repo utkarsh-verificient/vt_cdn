@@ -1,9 +1,9 @@
 import { handlerWrapper } from "@edx/edx-proctoring";
 
-console.log(process.env.JS_ENV_EXTRA_CONFIG);
+console.log(`${process.env.JS_ENV_EXTRA_CONFIG}`);
 
-const cdnURL = process.env.JS_ENV_EXTRA_CONFIG.PROCTORTRACK_CDN_URL;
-const KEY = process.env.JS_ENV_EXTRA_CONFIG.PROCTORTRACK_CONFIG_KEY;
+const cdnURL = `${process.env.JS_ENV_EXTRA_CONFIG.PROCTORTRACK_CDN_URL}`;
+const KEY = `${process.env.JS_ENV_EXTRA_CONFIG.PROCTORTRACK_CONFIG_KEY}`;
 
 let isCDNLoaded = false;
 let sessionUUID = null;
