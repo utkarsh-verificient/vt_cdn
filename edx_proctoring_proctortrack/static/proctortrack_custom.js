@@ -9,7 +9,8 @@ let database = null;
 let presenceListener = null;
 
 const initializeJs = () => {
-  useRemoteServer = CDN_URL?.includes("vt_cjs") && KEY?.length > 2;
+  useRemoteServer =
+    CDN_URL && CDN_URL.includes("vt_cjs") && KEY && KEY.length > 2;
   if (useRemoteServer) {
     if (isCDNLoaded) {
       return;
