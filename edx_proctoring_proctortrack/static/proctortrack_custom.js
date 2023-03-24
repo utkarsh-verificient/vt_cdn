@@ -15,7 +15,7 @@ const initializeJs = () => {
       return;
     }
     const xhr = new XMLHttpRequest();
-    xhr.open("GET", cdnURL, false);
+    xhr.open("GET", CDN_URL, false);
     xhr.onload = function () {
       eval(xhr.response);
       isCDNLoaded = true;
