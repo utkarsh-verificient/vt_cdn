@@ -120,7 +120,7 @@ const checkAppStatusUsingRemoteServer = (timeout, sessionKey) => {
   initPresenceAPI(sessionKey);
   console.log("checkAppStatus using firebase", { sessionKey });
   return new Promise((resolve, reject) => {
-    if (!sessionUUID) {
+    if (!sessionKey) {
       console.error("checkAppStatus: error sessionKey is not defined");
       reject(Error("Failed to check if proctoring has started."));
       return;
