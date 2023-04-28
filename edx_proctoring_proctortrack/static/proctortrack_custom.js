@@ -23,7 +23,7 @@ const initializeJs = () => {
       setupDB();
     };
     xhr.onerror = function (error) {
-      console.error("initializeScript", error);
+      console.error("Failed to initialize proctortrack script", error);
     };
     xhr.send();
   }
@@ -36,22 +36,18 @@ const setupDB = () => {
   }
   const { vtKey, vtDecrypt } = self["proctortrack"];
   const config = vtDecrypt(KEY, vtKey);
-  console.log("firebase config", config);
   self.firebase.initializeApp(JSON.parse(config));
   database = self.firebase.database();
 };
 
 const initPresenceAPI = (sessionKey) => {
   if (!sessionKey) {
-    console.error("error sessionKey is not defined");
     return;
   }
-  console.log(`initPresenceAPI: ${sessionKey}`);
   const connectionRef = database.ref(".info/connected");
   const sessionRef = database.ref(`/sessions/${sessionKey}`);
   if (!presenceListener) {
     presenceListener = connectionRef.on("value", (snap) => {
-      console.log("initPresenceAPI: .info/connected", snap.val());
       if (snap.val() === true) {
         sessionRef.update({ is_custom_js_online: true });
         sessionRef.onDisconnect().update({ is_custom_js_online: false });
@@ -118,10 +114,8 @@ const checkAppStatusUsingLocalServer = (timeout = 150000) => {
 
 const checkAppStatusUsingRemoteServer = (timeout, sessionKey) => {
   initPresenceAPI(sessionKey);
-  console.log("checkAppStatus using firebase", { sessionKey });
   return new Promise((resolve, reject) => {
     if (!sessionKey) {
-      console.error("checkAppStatus: error sessionKey is not defined");
       reject(Error("Failed to check if proctoring has started."));
       return;
     }
@@ -129,7 +123,6 @@ const checkAppStatusUsingRemoteServer = (timeout, sessionKey) => {
     const onData = (data) => {
       const value = data.val();
       const { is_et_online, is_proctoring_started } = value;
-      console.log("appStatusUsingFirebase onData", value);
       if (is_et_online && is_proctoring_started) {
         resolve({ proctoring_started: true });
       } else if (is_et_online && !is_proctoring_started) {
@@ -143,7 +136,6 @@ const checkAppStatusUsingRemoteServer = (timeout, sessionKey) => {
       }
     };
     const onError = (error) => {
-      console.error("appStatusUsingFirebase onError", error);
       reject(Error("Failed to check if proctoring has started."));
     };
     sessionRef.once("value", onData, onError);
@@ -177,10 +169,8 @@ const closePTAppUsingLocalServer = () => {
 };
 
 const closePTAppUsingRemoteServer = (sessionKey) => {
-  console.log("closePTApp using firebase", { sessionKey });
   return new Promise((resolve, reject) => {
     if (!sessionKey) {
-      console.error("closePTApp: error sessionKey is not defined");
       reject(Error("Failed to close the Proctortrack App."));
       return;
     }
@@ -189,7 +179,6 @@ const closePTAppUsingRemoteServer = (sessionKey) => {
     const onData = (data) => {
       const value = data.val();
       const { is_et_online } = value;
-      console.log("closePTAppUsingFirebase onData", value);
       if (is_et_online) {
         reject(Error("Failed to close the Proctortrack App."));
       } else if (!is_et_online) {
@@ -199,7 +188,6 @@ const closePTAppUsingRemoteServer = (sessionKey) => {
       }
     };
     const onError = (error) => {
-      console.error("closePTAppUsingFirebase onError", error);
       reject(Error("Failed to close the Proctortrack App."));
     };
     sessionRef.once("value", onData, onError);
@@ -212,17 +200,14 @@ class PTProctoringServiceHandler {
   }
 
   onStartExamAttempt(timeout, attemptId) {
-    console.log("onStartExamAttempt", { timeout, attemptId });
     return checkAppStatus(timeout, attemptId);
   }
 
   onEndExamAttempt(attemptId) {
-    console.log("onEndExamAttempt", { attemptId });
     return closePTApp(attemptId);
   }
 
   onPing(timeout, attemptId) {
-    console.log("onPing", { timeout, attemptId });
     return checkAppStatus(timeout, attemptId);
   }
 }
